@@ -17,7 +17,7 @@ def regressionPlot(X, Y, order):
     w = regressionFit(X, Y, phi)
 
     print 'w', w
-    # produce a plot of the values of the function 
+    # produce a plot of the values of the function
     pts = [[p] for p in pl.linspace(min(X), max(X), 100)]
     Yp = pl.dot(w.T, designMatrix(pts, order).T)
     pl.plot(pts, Yp.tolist()[0])
