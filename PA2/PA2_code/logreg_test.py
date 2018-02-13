@@ -65,7 +65,7 @@ def gradient_descent(gradient, init, step_size=0.01, train_x=None, train_y=None,
             print "Loss", loss(params, train_x, train_y)
 
         if real_time:
-            if i % 1000 == 0:
+            if i % 20000 == 0:
                 weights = params
                 plotDecisionBoundary(train_x[:, 1:], train_y, predict, [0.5], title = 'LR Train',\
                  real_time=True)
@@ -101,8 +101,8 @@ def run(data="ls"):
     X, Y = get_train_data(sep=data)
     validate_X, validate_Y = get_validation_data(sep=data)
     weights = gradient_descent(logistic_loss, np.random.rand(len(X[0]), 1), \
-                            train_x=X, train_y=Y, convergence_criteria=0.00008, \
-                            step_size = 0.01, l = 0, real_time=False)
+                            train_x=X, train_y=Y, convergence_criteria=0.0001, \
+                            step_size = 0.00009, l = 0, real_time=True)
     print weights
     print "Classification mistakes on train data:", mistakes(weights, X, Y)
     print "Classification mistakes on validation data:", mistakes(weights, validate_X, validate_Y)
@@ -117,8 +117,8 @@ def run_expansion(data="ls"):
     validate_X, validate_Y = get_validation_data(sep=data)
     validate_X = basis_expansion(validate_X)
     weights = gradient_descent(logistic_loss, np.random.rand(len(poly_x[0]), 1), \
-                            train_x=poly_x, train_y=Y, convergence_criteria=0.00001, \
-                            step_size = 0.0000001, l = 0.05, predict=predictLRPoly, real_time=True)
+                            train_x=poly_x, train_y=Y, convergence_criteria=0.0002, \
+                            step_size = 0.008, l = 0, predict=predictLRPoly, real_time=True)
     print weights
     print "Classification mistakes on train data:", mistakes(weights, poly_x, Y)
     print "Classification mistakes on validation data:", mistakes(weights, validate_X, validate_Y)
@@ -128,3 +128,6 @@ def run_expansion(data="ls"):
 
 if __name__ == '__main__':
     run_expansion("nonlin")
+    # run("nls")
+    # run("nonlin")
+    # run_expansion("nonlin")
