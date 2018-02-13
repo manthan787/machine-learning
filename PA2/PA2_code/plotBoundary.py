@@ -25,4 +25,4 @@ def plotDecisionBoundary(X, Y, scoreFn, values, title = "", real_time=False):
     pl.title(title)
     pl.axis('tight')
     if real_time: pl.pause(0.2)
-    else: pl.pause(10)
+    else: pl.pause(100)
