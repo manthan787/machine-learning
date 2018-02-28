@@ -1,7 +1,9 @@
 import random
 from numpy import *
 from plotGauss2D import *
- 
+from EM import GMM
+import dataset
+
 #############################
 # Mixture Of Gaussians
 #############################
@@ -30,8 +32,8 @@ def plotMOG(X, param, colors = colors):
     for (g, c) in zip(param, colors[:len(param)]):
         e = g.plot(color=c)
         ax.add_artist(e)
-    pl.show()
     plotData(X)
+    pl.show()
  
 def plotData(X):
     pl.plot(X[:,0:1].T[0],X[:,1:2].T[0], 'gs')
@@ -49,9 +51,17 @@ def randomParams(X, m=2):
                 var=varMat(3*random.random(), 3*random.random(), 3*random.random()-1.5)) \
             for i in range(m)]
  
-# parameters
-data = 'data_1_small'
-# load data from train files
-X = loadtxt(data+'.txt')
-# Plots data with random mixture.
-plotMOG(X, randomParams(X, 2))
+
+def params(res):
+    pi, mu, sigma = res
+    dists = []
+    for p, m, s in zip(pi, mu, sigma):
+        dists.append(MOG(pi=p, mu=m, var=s))
+    return dists
+
+
+if __name__ == '__main__':
+    gmm = GMM(3, iterations=1000)
+    dataset_name = "mystery_1"
+    data = dataset.read_data(name=dataset_name)
+    plotMOG(data, params(gmm.fit(data)))
