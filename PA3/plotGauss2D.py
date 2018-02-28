@@ -10,6 +10,5 @@ def plotGauss2D(pos, P, r = 2., color = 'black'):
               height=2*r*math.sqrt(s[1]), angle=orient,
               edgecolor=color, fill = False, lw = 3, zorder = 10)
     ax = pl.gca()
-    ax.add_patch(ellipsePlot);
+    ax.add_patch(ellipsePlot)
     return ellipsePlot
-
