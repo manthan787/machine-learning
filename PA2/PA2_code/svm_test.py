@@ -110,10 +110,10 @@ def svm_linear(data="nonlin"):
     global a_k, x_k, y_k, bias, weights
     X, Y = get_train_data(sep=data)
     validate_X, validate_Y = get_validation_data(sep=data)
-    a_k, x_k, y_k, weights, bias = svm_train_linear(X, Y, C=10, kernel=linear_kernel)
+    a_k, x_k, y_k, weights, bias = svm_train_linear(X, Y, C=0.05, kernel=linear_kernel)
     print "Train ", mistakes(X, Y)
     print "Validate ", mistakes(validate_X, validate_Y)
-    plotDecisionBoundary(X, Y, predictSVM, [-1, 0, 1], title = 'SVM Train Linear')
+    plotDecisionBoundary(validate_X, validate_Y, predictSVM, [-1, 0, 1], title = 'SVM Train Linear')
     plotDecisionBoundary(validate_X, validate_Y, predictSVM, [-1, 0, 1], title = 'SVM Validate Linear')
 
 def svm_poly(data="nonlin"):
@@ -140,5 +140,5 @@ def svm_gaussian(data="nonlin"):
 # svm_linear("nonlin")
 # svm_gaussian("nonlin")
 # svm_gaussian("nls")
-svm_poly("nonlin")
+svm_linear("ls")
 
