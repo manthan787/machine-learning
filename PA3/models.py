@@ -9,8 +9,8 @@ from plotGauss2D import *
 class GMM(object):
     """ Gaussian mixture model using Expectation-Maximization algorithm """
 
-    def __init__(self, k, d=2, pi=None, mu=None, sigma=None, iterations=50,
-                 threshold=1e-2, variant="full"):
+    def __init__(self, k, d=2, pi=None, mu=None, sigma=None, iterations=30,
+                 threshold=1e-4, variant="full"):
         self.k = k  # Number of gaussians in the mixture
         self.d = d  # Number of variables
         self.variant = variant
@@ -33,6 +33,8 @@ class GMM(object):
 
     def init_sigma(self):
         """ Initialize value for covariance matrices """
+        if self.variant == 'diag':
+            return np.ones((self.k, self.d))
         return np.repeat([np.eye(self.d)], self.k, axis=0)
 
     def expectation(self, X):
@@ -47,7 +49,7 @@ class GMM(object):
             self.responsibility.sum(axis=0)
 
     def maximization(self, X):
-        n = len(X)
+        n, d = X.shape
 
         # Maximize w.r.t. pi, means (mu), covariance
         for j in xrange(self.k):
@@ -55,11 +57,14 @@ class GMM(object):
             self.pi[j] = r_k / n
             self.mu[j] = np.dot(self.responsibility[j, :], X) / r_k
             for i in range(n):
-                diff = (X[i] - self.mu[j]).reshape(self.d, 1)
-                self.sigma[j] += self.responsibility[j, i] * \
-                    np.dot(diff, diff.T)
-                # self.sigma[j] += self.responsibility[j, i] * \
-                #         ((X[i] - self.mu[j]) ** 2)
+                if self.variant == 'full':
+                    diff = (X[i] - self.mu[j]).reshape(self.d, 1)
+                    self.sigma[j] += self.responsibility[j, i] * \
+                        np.dot(diff, diff.T)
+                
+                if self.variant == 'diag':
+                    self.sigma[j] += self.responsibility[j, i] * \
+                                ((X[i] - self.mu[j]) ** 2)
             self.sigma[j] = self.sigma[j] / r_k
         self.calculate_likelihood(X, n)
 
@@ -167,5 +172,7 @@ def gmm_with_kmeans(k, data):
     gmm.fit()
 
 if __name__ == '__main__':
-    gmm_with_kmeans(2, "data_1_large")
+    # gmm_with_kmeans(2, "data_1_large")    
+    gmm = GMM(2, variant="diag")
+    gmm.fit(dataset.read_data("data_1_large"))
     
