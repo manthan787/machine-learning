@@ -1,7 +1,7 @@
 import random
 from numpy import *
 from plotGauss2D import *
-from EM import GMM
+from models import GMM, KMeans, plotKMeans
 import dataset
 
 #############################
@@ -27,7 +27,7 @@ class MOG:
 colors = ('blue', 'yellow', 'black', 'red', 'cyan')
 
 
-def plotMOG(X, param, colors=colors):
+def plotMOG(X, param, colors=colors, title=""):
     fig = pl.figure()                   # make a new figure/window
     ax = fig.add_subplot(111, aspect='equal')
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
@@ -38,7 +38,8 @@ def plotMOG(X, param, colors=colors):
         e = g.plot(color=c)
         ax.add_artist(e)
     plotData(X)
-    pl.show()
+    pl.title("{} k={}".format(title, len(param[0].mu)))
+    pl.draw()
 
 
 def plotData(X):
@@ -65,11 +66,54 @@ def params(res):
     dists = []
     for p, m, s in zip(pi, mu, sigma):
         dists.append(MOG(pi=p, mu=m, var=s))
+    print dists
     return dists
 
 
-if __name__ == '__main__':
-    gmm = GMM(3, variant="diag")
-    dataset_name = "data_3_large"
+def plot_loglikelihood(k, ll, title=""):
+    """ Plot GMM log likelihood for different config """
+    pl.plot(k, ll)
+    pl.title(title)
+
+
+def gmm_with_kmeans(k, data):
+    data = dataset.read_data(data)
+    kmeans = KMeans(k)
+    centroids, labels = kmeans.fit(data)
+    plotKMeans(data, kmeans.mu, labels)
+    print centroids.shape
+    gmm = GMM(k, mu=centroids)
+    plotMOG(data, params(gmm.fit(data)), title="GMM with KMeans")
+
+    gmm = GMM(k)
+    plotMOG(data, params(gmm.fit(data)), title="GMM general")
+    pl.show()
+
+
+def gmm_test():
+    gmm = GMM(2, variant="diag")
+    dataset_name = "data_1_small"
     data = dataset.read_data(name=dataset_name)
     plotMOG(data, params(gmm.fit(data)))
+
+
+def gmm_log_plot(d, type="full"):
+    ks, ll = [], []
+    for i in xrange(1, 8):
+        data = dataset.read_data(d)
+        if type == "full":
+            gmm = GMM(i)
+        elif type == "kmeans":
+            gmm = GMM(i, mu=KMeans(i).fit(data)[0])            
+        gmm.fit(data)
+        ks.append(i)
+        ll.append(gmm.likelihood)
+        print("Likelihood for k = {} => {}".format(i, gmm.likelihood))
+    plot_loglikelihood(ks, ll, title="GMM full variance")
+    pl.show()
+
+
+if __name__ == '__main__':
+    # gmm_with_kmeans(3, "data_2_large")
+    gmm_log_plot("data_2_large")
+    gmm_log_plot("data_2_large", type="kmeans")
