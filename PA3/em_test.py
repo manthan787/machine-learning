@@ -11,6 +11,7 @@ import dataset
 
 class MOG:
     """ A simple class for a Mixture of Gaussians """
+
     def __init__(self, pi=0, mu=0, var=0):
         self.pi = pi
         self.mu = mu
@@ -38,7 +39,7 @@ def plotMOG(X, param, colors=colors, title=""):
         e = g.plot(color=c)
         ax.add_artist(e)
     plotData(X)
-    pl.title("{} k={}".format(title, len(param[0].mu)))
+    pl.title("{} k={}".format(title, len(param)))
     pl.draw()
 
 
@@ -61,18 +62,19 @@ def randomParams(X, m=2):
             for i in range(m)]
 
 
-def params(res):
+def params(res, variant="full"):
     pi, mu, sigma = res
     dists = []
     for p, m, s in zip(pi, mu, sigma):
-        dists.append(MOG(pi=p, mu=m, var=s))
+        dists.append(MOG(pi=p, mu=m, var=diag(s) if variant == "diag" else s))
     print dists
     return dists
 
 
-def plot_loglikelihood(k, ll, title=""):
+def plot_loglikelihood(k, ll, title="", label="full"):
     """ Plot GMM log likelihood for different config """
-    pl.plot(k, ll)
+    pl.plot(k, ll, label=label)
+    pl.legend()
     pl.title(title)
 
 
@@ -90,11 +92,10 @@ def gmm_with_kmeans(k, data):
     pl.show()
 
 
-def gmm_test():
-    gmm = GMM(2, variant="diag")
-    dataset_name = "data_1_small"
-    data = dataset.read_data(name=dataset_name)
-    plotMOG(data, params(gmm.fit(data)))
+def gmm_test(k, variant, data_set, title):
+    gmm = GMM(k, variant=variant)
+    data = dataset.read_data(name=data_set)
+    plotMOG(data, params(gmm.fit(data), variant), title=title)
 
 
 def gmm_log_plot(d, type="full"):
@@ -104,16 +105,25 @@ def gmm_log_plot(d, type="full"):
         if type == "full":
             gmm = GMM(i)
         elif type == "kmeans":
-            gmm = GMM(i, mu=KMeans(i).fit(data)[0])            
+            gmm = GMM(i, mu=KMeans(i).fit(data)[0])
+        elif type == "diag":
+            gmm = GMM(i, variant="diag")
         gmm.fit(data)
         ks.append(i)
-        ll.append(gmm.likelihood)
+        ll.append(-gmm.likelihood)
         print("Likelihood for k = {} => {}".format(i, gmm.likelihood))
-    plot_loglikelihood(ks, ll, title="GMM full variance")
-    pl.show()
+    plot_loglikelihood(ks, ll, label=type)
+    pl.ylabel("Log Likelihood")
+    pl.xlabel("Number of mixtures")
+    pl.draw()
 
 
 if __name__ == '__main__':
     # gmm_with_kmeans(3, "data_2_large")
-    gmm_log_plot("data_2_large")
-    gmm_log_plot("data_2_large", type="kmeans")
+    gmm_log_plot("data_3_large")
+    gmm_log_plot("data_3_large", type="kmeans")
+    gmm_log_plot("data_3_large", type="diag")
+    pl.show()
+    # gmm_test(5, "diag", "data_3_large", "GMM with full covariance")
+    # gmm_test(5, "full", "data_3_large", "GMM with diagonal covariance")
+    # pl.show()
