@@ -4,13 +4,14 @@ from scipy.stats import multivariate_normal
 import dataset
 import sys
 from plotGauss2D import *
+from scipy.special import logsumexp
 
 
 class GMM(object):
     """ Gaussian mixture model using Expectation-Maximization algorithm """
 
     def __init__(self, k, d=2, pi=None, mu=None, sigma=None, iterations=30,
-                 threshold=1e-4, variant="full"):
+                 threshold=1e-4, variant="full", progress=True):
         self.k = k  # Number of gaussians in the mixture
         self.d = d  # Number of variables
         self.variant = variant
@@ -22,6 +23,7 @@ class GMM(object):
         self.likelihood = 1.0
         self.threshold = threshold
         self.converged = False
+        self.progress = progress
 
     def init_pi(self):
         """ Initialize value for gaussian priors """
@@ -85,7 +87,8 @@ class GMM(object):
             self.expectation(X)
             self.maximization(X)
             i += 1
-            self.print_progress(i, self.likelihood)
+            if self.progress:
+                self.print_progress(i, self.likelihood)
         return self.pi, self.mu, self.sigma
 
     def print_progress(self, i, l):
@@ -107,10 +110,11 @@ def fit_retry(k, data, attempt=1):
 
 class KMeans(object):
 
-    def __init__(self, k, max_iter=1000):
+    def __init__(self, k, max_iter=1000, progress=False):
         self.k = k  # Number of clusters
         self.mu = None  # Centroids of clusters
         self.max_iter = max_iter
+        self.progress = progress
 
     def fit(self, X):
         n, d = X.shape
@@ -128,13 +132,14 @@ class KMeans(object):
                 new_mu[i, :] = np.take(X, cluster_i, axis=0).mean(axis=0)
 
             if np.all(self.mu == new_mu):
-                print "converged", iters
+                # print "converged", iters
                 break
 
             self.mu = new_mu
             new_mu = np.zeros((self.k, d))
             iters += 1
-            self.print_progress(iters)
+            if self.progress:
+                self.print_progress(iters)
         return self.mu, labels
 
     def print_progress(self, i):
@@ -175,4 +180,3 @@ if __name__ == '__main__':
     # gmm_with_kmeans(2, "data_1_large")    
     gmm = GMM(2, variant="diag")
     gmm.fit(dataset.read_data("data_1_large"))
-    
