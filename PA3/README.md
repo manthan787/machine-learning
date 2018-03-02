@@ -1,5 +1,7 @@
 ## PA 3
 
+Report is in `manthan_thakar_PA3.pdf`.
+
 ### EM
 
 The code for `Expectation Maximization Algorithm for GMM` implementation can be found in `models.py` in class `GMM`.
