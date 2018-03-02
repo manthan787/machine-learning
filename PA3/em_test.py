@@ -100,14 +100,14 @@ def gmm_test(k, variant, data_set, title):
 
 def gmm_log_plot(d, type="full"):
     ks, ll = [], []
-    for i in xrange(1, 8):
+    for i in xrange(1, 5):
         data = dataset.read_data(d)
-        if type == "full":
-            gmm = GMM(i)
-        elif type == "kmeans":
+        if type == "kmeans":
             gmm = GMM(i, mu=KMeans(i).fit(data)[0])
         elif type == "diag":
             gmm = GMM(i, variant="diag")
+        else:
+            gmm = GMM(i)
         gmm.fit(data)
         ks.append(i)
         ll.append(-gmm.likelihood)
@@ -120,9 +120,17 @@ def gmm_log_plot(d, type="full"):
 
 if __name__ == '__main__':
     # gmm_with_kmeans(3, "data_2_large")
-    gmm_log_plot("data_3_large")
-    gmm_log_plot("data_3_large", type="kmeans")
-    gmm_log_plot("data_3_large", type="diag")
+
+    # Q1.3
+    # gmm_log_plot("data_1_large", type="data_1_large")
+    # gmm_log_plot("data_2_large", type="data_2_large")
+    # gmm_log_plot("data_3_large", type = "data_3_large")
+    gmm_log_plot("data_1_small", type="data_1_small")
+    gmm_log_plot("data_2_small", type="data_2_small")
+    gmm_log_plot("data_3_small", type="data_3_small")
+    # gmm_log_plot("data_3_large")
+    # gmm_log_plot("data_3_large", type="kmeans")
+    # gmm_log_plot("data_3_large", type="diag")
     pl.show()
     # gmm_test(5, "diag", "data_3_large", "GMM with full covariance")
     # gmm_test(5, "full", "data_3_large", "GMM with diagonal covariance")
