@@ -173,10 +173,11 @@ def gmm_with_kmeans(k, data):
     data = dataset.read_data(data)
     centroids, labels = kmeans.fit(data)
     plotKMeans(data, kmeans.mu, labels)
-    gmm = GMM(k)
-    gmm.fit()
+    # gmm = GMM(k)
+    # gmm.fit()
 
 if __name__ == '__main__':
-    # gmm_with_kmeans(2, "data_1_large")    
-    gmm = GMM(2, variant="diag")
-    gmm.fit(dataset.read_data("data_1_large"))
+    gmm_with_kmeans(3) 
+    gmm.fit("mystery_1")
+    # gmm = GMM(2, variant="diag")
+    # gmm.fit(dataset.read_data("data_1_large"))

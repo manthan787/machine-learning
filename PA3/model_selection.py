@@ -108,7 +108,7 @@ def fit_retry(k, data, variant, init, attempt=1):
 
 def leave_one_out_validation(data_set):
     data = dataset.read_data(data_set)
-    cross_validation(data_set, data.shape[0] - 1)
+    return cross_validation(data_set, data.shape[0] - 1)
 
 
 def cross_validation(data_set, k):
@@ -133,19 +133,28 @@ def cross_validation(data_set, k):
     ranked = sorted(train_results.iteritems(),
                     key=lambda x: x[1], reverse=True)
     print "Best model is {}".format(ranked[0])
-    best_model = sorted(models[ranked[0][0]],
+    best_conf = ranked[0][0]
+    best_model = sorted(models[best_conf],
                         key=lambda x: x[0], reverse=True)[0][1]
     large_data = dataset.read_data(data_set[0:-5]+"large")
-    print test(best_model, large_data)
-    plotMOG(large_data, params((best_model.pi, best_model.mu, best_model.sigma)))
+    t = test(best_model, large_data)
+    print "Test results", t
+    plotMOG(large_data, params((best_model.pi, best_model.mu, best_model.sigma)), 
+            title="Selected model for cross-validation k = {}".format(k))
     pl.show()
+    return ranked[0][1] / (n / fold), t
 
 
 if __name__ == '__main__':
     # rank_models()
-    leave_one_out_validation("data_1_small")
+    # leave_one_out_validation("data_1_small")
     # leave_one_out_validation("data_2_small")
     # leave_one_out_validation("data_3_small")
-    cross_validation("data_1_small", 4)
+    # leave_one_out_validation("data_1_small")
+    train_ll, test_ll = cross_validation("data_2_small", 10)
+    train_ll_1, test_ll_1 = leave_one_out_validation("data_2_small")
+    plot_rankings({"k=4": train_ll, "loo": train_ll_1},
+                  {"k=4": test_ll, "loo": test_ll_1})
+    pl.show()
     # cross_validation("data_2_small", 4)
     # cross_validation("data_3_small", 6)

@@ -39,7 +39,7 @@ def plotMOG(X, param, colors=colors, title=""):
         e = g.plot(color=c)
         ax.add_artist(e)
     plotData(X)
-    pl.title("{} k={}".format(title, len(param)))
+    pl.title("{} mixtures={}".format(title, len(param)))
     pl.draw()
 
 
@@ -82,23 +82,26 @@ def gmm_with_kmeans(k, data):
     data = dataset.read_data(data)
     kmeans = KMeans(k)
     centroids, labels = kmeans.fit(data)
-    plotKMeans(data, kmeans.mu, labels)
-    print centroids.shape
+    # plotKMeans(data, kmeans.mu, labels)
+    # print centroids.shape
     gmm = GMM(k, mu=centroids)
-    plotMOG(data, params(gmm.fit(data)), title="GMM with KMeans")
+    plotMOG(data, params(gmm.fit(data)), title="GMM with KMeans likelihood={}".format(gmm.likelihood))
 
     gmm = GMM(k)
-    plotMOG(data, params(gmm.fit(data)), title="GMM general")
+    plotMOG(data, params(gmm.fit(data)),
+            title="GMM general likelihood={}".format(gmm.likelihood))
     pl.show()
 
 
 def gmm_test(k, variant, data_set, title):
     gmm = GMM(k, variant=variant)
     data = dataset.read_data(name=data_set)
-    plotMOG(data, params(gmm.fit(data), variant), title=title)
+    res = gmm.fit(data)
+    plotMOG(data, params(res, variant), title=title + " Likelihood={}".format(gmm.likelihood))
+    print "Log Likelihood: ", str(gmm.likelihood)
 
 
-def gmm_log_plot(d, type="full"):
+def gmm_log_plot(d, type="full", title=""):
     ks, ll = [], []
     for i in xrange(1, 5):
         data = dataset.read_data(d)
@@ -112,7 +115,7 @@ def gmm_log_plot(d, type="full"):
         ks.append(i)
         ll.append(-gmm.likelihood)
         print("Likelihood for k = {} => {}".format(i, gmm.likelihood))
-    plot_loglikelihood(ks, ll, label=type)
+    plot_loglikelihood(ks, ll, label=type, title=title)
     pl.ylabel("Log Likelihood")
     pl.xlabel("Number of mixtures")
     pl.draw()
@@ -120,17 +123,19 @@ def gmm_log_plot(d, type="full"):
 
 if __name__ == '__main__':
     # gmm_with_kmeans(3, "data_2_large")
-
+    gmm_test(1, "full", "mystery_2", "Full covariance GMM")
+    # # gmm_test(2, "diag", "data_3_large", "Diag Covariance GMM")
+    # pl.show()
     # Q1.3
     # gmm_log_plot("data_1_large", type="data_1_large")
     # gmm_log_plot("data_2_large", type="data_2_large")
     # gmm_log_plot("data_3_large", type = "data_3_large")
-    gmm_log_plot("data_1_small", type="data_1_small")
-    gmm_log_plot("data_2_small", type="data_2_small")
-    gmm_log_plot("data_3_small", type="data_3_small")
-    # gmm_log_plot("data_3_large")
-    # gmm_log_plot("data_3_large", type="kmeans")
-    # gmm_log_plot("data_3_large", type="diag")
+    # gmm_log_plot("data_1_small", type="data_1_small")
+    # gmm_log_plot("data_2_small", type="data_2_small")
+    # gmm_log_plot("data_3_small", type="data_3_small")
+    # gmm_log_plot("mystery_1", title="data_2_small")
+    # gmm_log_plot("data_2_small", type="kmeans", title="data_2_small")
+    # gmm_log_plot("data_2_small", type="diag", title="data_2_small")
     pl.show()
     # gmm_test(5, "diag", "data_3_large", "GMM with full covariance")
     # gmm_test(5, "full", "data_3_large", "GMM with diagonal covariance")
