@@ -24,4 +24,3 @@ There are other parameters (optional) to the GMM class that you can look at by l
 ### Model selection
 
 The model selection code lives inside `model_selection.py` file.
-
