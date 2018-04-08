@@ -6,11 +6,11 @@ from abc import ABCMeta, abstractmethod
 
 class RL(object):
 
-    def __init__(self, grid, alpha=0.001, gamma=0.99, l=0,
+    def __init__(self, grid, alpha=0.01, gamma=0.99, l=0,
                  num_episodes=10, exps=10, epsilon=0.1):
         self.grid = grid
         self.Q = self._init_q()
-        self.alpha = 0.02
+        self.alpha = alpha
         self.num_episodes = num_episodes
         self.exps = exps
         self.epsilon = epsilon
@@ -87,8 +87,9 @@ class SarsaLambdaLearner(RL):
         if not start_state:
             start_state = self._init_start_state()
         for e in xrange(self.exps):
-            self.Q, self.e = self._init_q(), self._init_e()
+            self.Q= self._init_q()
             for i in xrange(self.num_episodes):
+                self.e = self._init_e()
                 rewards, state, is_terminal = 0, start_state, False
                 action = self._next_action(state)
                 while not is_terminal:
@@ -128,5 +129,5 @@ def plot(v):
 
 shape = (5, 5)
 g = GridworldEnv(shape=shape)
-l = SarsaLambdaLearner(g, exps=2, l=0.2, num_episodes=1000, gamma=0.99, alpha=0.1, epsilon=0.3)
+l = SarsaLambdaLearner(g, exps=2, l=0.8, num_episodes=400, gamma=0.99, alpha=0.1, epsilon=0.3)
 print l.learn()
