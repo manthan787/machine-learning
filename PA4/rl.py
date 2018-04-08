@@ -87,7 +87,7 @@ class SarsaLambdaLearner(RL):
         if not start_state:
             start_state = self._init_start_state()
         for e in xrange(self.exps):
-            self.Q= self._init_q()
+            self.Q = self._init_q()
             for i in xrange(self.num_episodes):
                 self.e = self._init_e()
                 rewards, state, is_terminal = 0, start_state, False
@@ -96,7 +96,8 @@ class SarsaLambdaLearner(RL):
                     new_state, reward, is_terminal = self.grid.move(
                         state, action)
                     new_action = self._next_action(state)
-                    delta = reward + self.gamma * self.Q[new_state, new_action] - self.Q[state, action]
+                    delta = reward + self.gamma * \
+                        self.Q[new_state, new_action] - self.Q[state, action]
                     self.e[state, action] += 1
                     self.Q += self.alpha * delta * self.e
                     self.e = self.gamma * self.l * self.e
@@ -127,7 +128,9 @@ def plot(v):
     plt.show()
 
 
-shape = (5, 5)
-g = GridworldEnv(shape=shape)
-l = SarsaLambdaLearner(g, exps=2, l=0.8, num_episodes=400, gamma=0.99, alpha=0.1, epsilon=0.3)
-print l.learn()
+if __name__ == '__main__':
+    shape = (5, 5)
+    g = GridworldEnv(shape=shape)
+    l = SarsaLambdaLearner(g, exps=2, l=0.8, num_episodes=400,
+                           gamma=0.99, alpha=0.1, epsilon=0.3)
+    print l.learn()
