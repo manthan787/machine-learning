@@ -1,13 +1,13 @@
+from __future__ import division
 import numpy as np
 from gridworld import GridworldEnv
 import sys
-from abc import ABCMeta, abstractmethod
 
 
 class RL(object):
 
     def __init__(self, grid, alpha=0.01, gamma=0.99, l=0,
-                 num_episodes=10, exps=10, epsilon=0.1):
+                 num_episodes=500, exps=500, epsilon=0.1):
         self.grid = grid
         self.Q = self._init_q()
         self.alpha = alpha
@@ -53,6 +53,8 @@ class RL(object):
 class QLearner(RL):
 
     def learn(self, start_state=None):
+        time_steps_per_episode, max_q_value_per_episode = np.zeros(
+            (1, self.num_episodes)), np.zeros((1, self.num_episodes))
         if not start_state:
             start_state = self._init_start_state()
         for e in xrange(self.exps):
@@ -63,17 +65,18 @@ class QLearner(RL):
                     action = self._next_action(state)
                     new_state, reward, is_terminal = self.grid.move(
                         state, action)
-                    self.Q[state, action] = self.Q[state, action] + self.alpha * \
-                        reward + self.gamma * \
-                        np.max(self.Q[new_state]) - self.Q[state, action]
+                    self.Q[state, action] += self.alpha * (reward + (self.gamma * (np.max(self.Q[new_state]))) - self.Q[state, action])
                     state, rewards = new_state, rewards + reward
+                    time_steps_per_episode[0, i] += 1
                     if is_terminal:
                         break
-                sys.stdout.write("Experiment: {} Total Rewards after {} experiments = {} \r".format(
-                    e + 1, i + 1, rewards))
+                max_q_value_per_episode[0, i] += np.max(self.Q[start_state])
+                sys.stdout.write("Experiment: {}\t Episodes: {}\r".format(
+                    e + 1, i + 1))
                 sys.stdout.flush()
-
-        return self._policy_directions(self._choose_policy())
+        avg_time_steps = time_steps_per_episode / self.exps
+        avg_max_q = max_q_value_per_episode / self.exps
+        return self._policy_directions(self._choose_policy()), avg_time_steps, avg_max_q
 
 
 class SarsaLambdaLearner(RL):
@@ -84,6 +87,8 @@ class SarsaLambdaLearner(RL):
         self.e = self._init_e()
 
     def learn(self, start_state=None):
+        time_steps_per_episode, max_q_value_per_episode = np.zeros(
+            (1, self.num_episodes)), np.zeros((1, self.num_episodes))
         if not start_state:
             start_state = self._init_start_state()
         for e in xrange(self.exps):
@@ -102,12 +107,16 @@ class SarsaLambdaLearner(RL):
                     self.Q += self.alpha * delta * self.e
                     self.e = self.gamma * self.l * self.e
                     state, action, rewards = new_state, new_action, rewards + reward
+                    time_steps_per_episode[0, i] += 1
                     if is_terminal:
                         break
+                max_q_value_per_episode[0, i] += np.max(self.Q[start_state])
                 sys.stdout.write("Experiment: {} Total Rewards after {} experiments = {} \r".format(
                     e + 1, i + 1, rewards))
                 sys.stdout.flush()
-        return self._policy_directions(self._choose_policy())
+        avg_time_steps = time_steps_per_episode / self.exps
+        avg_max_q = max_q_value_per_episode / self.exps
+        return self._policy_directions(self._choose_policy()), avg_time_steps, avg_max_q
 
 
 def plot(v):
