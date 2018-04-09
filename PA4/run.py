@@ -9,28 +9,30 @@ def args_handler(parser):
     args = parser.parse_args()
     config, size = {}, DEFAULT_GRID_SIZE
     if args.size:
-        size = args.size
+        size = int(args.size)
     grid = GridworldEnv((size, size))
     if args.gamma:
-        config['gamma'] = args.gamma
+        config['gamma'] = float(args.gamma)
     if args.exps:
-        config['exps'] = args.exps
+        config['exps'] = int(args.exps)
     if args.eps:
-        config['num_episodes'] = args.eps
+        config['num_episodes'] = int(args.eps)
     if args.epsilon:
-        config['epsilon'] = args.epsilon
+        config['epsilon'] = float(args.epsilon)
     if args.alpha:
-        config['alpha'] = args.alpha
+        config['alpha'] = float(args.alpha)
     if args.lamb:
-        config['lambda'] = args.lamb
+        config['l'] = float(args.lamb)
     if args.alg not in ['q', 's']:
         parser.print_help()
         return
     elif args.alg == 'q':
         learner = QLearner(grid, **config)
     elif args.alg == 's':
-        learner = SarsaLambdaLearner(grid, **config)
-    learner.learn()
+        learner = SarsaLambdaLearner(grid, **config)    
+    print "\n"
+    print  learner.learn()[0]
+    
 
 
 if __name__ == "__main__":
